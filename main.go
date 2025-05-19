@@ -2,16 +2,17 @@ package main
 
 import "fmt"
 
+const NMAX = 100
+
 type Akun struct {
 	username string
 	password string
 }
 
-var akunList [100]Akun
+var akunList [NMAX]Akun
 var jumlahAkun int
 
 func register(username string, password string) string {
-	// Cek apakah username sudah ada
 	ketemu := false
 	for i := 0; i < jumlahAkun; i++ {
 		ketemu = ketemu || (akunList[i].username == username)
@@ -39,28 +40,6 @@ func login(username string, password string) string {
 	}[sukses]
 }
 
-func main() {
-	for {
-		var pilih int
-		fmt.Println("1. Register")
-		fmt.Println("2. Login")
-		fmt.Println("3. Keluar")
-		fmt.Print("Pilih menu: ")
-		fmt.Scan(&pilih)
-
-		pesan := map[int]string{
-			1: jalankanRegister(),
-			2: jalankanLogin(),
-			3: "Keluar",
-		}[pilih]
-
-		fmt.Println(pesan)
-		if pilih == 3 {
-			break
-		}
-	}
-}
-
 func jalankanRegister() string {
 	var u, p string
 	fmt.Print("Username baru: ")
@@ -77,4 +56,33 @@ func jalankanLogin() string {
 	fmt.Print("Masukkan password: ")
 	fmt.Scan(&p)
 	return login(u, p)
+}
+
+func main() {
+	var pilih int
+	for {
+		fmt.Println("1. Register")
+		fmt.Println("2. Login")
+		fmt.Println("3. Keluar")
+		fmt.Print("Pilih menu: ")
+		fmt.Scan(&pilih)
+
+		pesan := map[int]string{
+			1: jalankanRegister(),
+			2: jalankanLogin(),
+			3: "Keluar",
+		}[pilih]
+
+		fmt.Println(pesan)
+
+		// Menghindari penggunaan if, jadi pakai cara manual keluar loop
+		berhenti := map[bool]bool{
+			true:  true,
+			false: false,
+		}[pilih == 3]
+
+		for berhenti {
+			return
+		}
+	}
 }
