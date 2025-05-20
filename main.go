@@ -214,7 +214,6 @@ func main() {
 		switch pilih {
 		case 1:
 			fmt.Print("Komentar baru: ")
-			var teks string
 			fmt.Scanln()
 			getline := ""
 			for getline == "" {
@@ -226,7 +225,6 @@ func main() {
 			var i int
 			fmt.Scan(&i)
 			fmt.Print("Komentar baru: ")
-			var teks string
 			fmt.Scanln()
 			getline := ""
 			for getline == "" {
