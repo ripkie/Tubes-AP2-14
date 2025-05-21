@@ -38,7 +38,7 @@ func inisialisasiDataDummy() {
 func register(username, password string) string {
 	for i := 0; i < jumlahAkun; i++ {
 		if akunList[i].username == username {
-			return "Username sudah digunakan."
+			return "Username sudah digunakan"
 		}
 	}
 	akunList[jumlahAkun] = Akun{username, password}
