@@ -1,264 +1,476 @@
 package main
 
-import (
-	"fmt"
-	"strings"
-)
+import "fmt"
 
-const NMAX = 100
+const NMAX int = 100
 
-type Komentar struct {
-	Teks      string
-	Sentimen  string
-	Moderator string
+type arrkata [NMAX]string
+
+type komentar struct {
+	isi        arrkata
+	jumlahKata int
 }
 
-type Akun struct {
-	username string
-	password string
-}
+type arrKalimat [NMAX]komentar
 
-var akunList [NMAX]Akun
-var komentarList [NMAX]Komentar
-var jumlahAkun, jumlahKomentar int
+func main() {
+	var daftarKomentar arrKalimat
+	var jumlahKomentar int
+	var pilihan int
 
-// ====== Data Dummy ======
-func inisialisasiDataDummy() {
-	komentarList[0] = Komentar{"Saya sangat senang dengan fitur ini", "", "admin"}
-	komentarList[1] = Komentar{"Aplikasi ini buruk dan membingungkan", "", "admin"}
-	komentarList[2] = Komentar{"Cukup membantu, tapi masih kurang", "", "admin"}
+	// Data dummy contoh (3 komentar)
+	daftarKomentar[0].isi[0] = "saya"
+	daftarKomentar[0].isi[1] = "sangat"
+	daftarKomentar[0].isi[2] = "senang"
+	daftarKomentar[0].jumlahKata = 3
+
+	daftarKomentar[1].isi[0] = "aplikasi"
+	daftarKomentar[1].isi[1] = "ini"
+	daftarKomentar[1].isi[2] = "buruk"
+	daftarKomentar[1].jumlahKata = 3
+
+	daftarKomentar[2].isi[0] = "fitur"
+	daftarKomentar[2].isi[1] = "mantap"
+	daftarKomentar[2].jumlahKata = 2
+
 	jumlahKomentar = 3
 
-	for i := 0; i < jumlahKomentar; i++ {
-		komentarList[i].Sentimen = analisisSentimen(komentarList[i].Teks)
-	}
-}
-
-// ===== Register & Login =====
-func register(username, password string) string {
-	for i := 0; i < jumlahAkun; i++ {
-		if akunList[i].username == username {
-			return "Username sudah digunakan"
-		}
-	}
-	akunList[jumlahAkun] = Akun{username, password}
-	jumlahAkun++
-	return "Registrasi berhasil."
-}
-
-func login(username, password string) bool {
-	for i := 0; i < jumlahAkun; i++ {
-		if akunList[i].username == username && akunList[i].password == password {
-			return true
-		}
-	}
-	return false
-}
-
-// ===== Analisis Sentimen =====
-func analisisSentimen(teks string) string {
-	positif := [5]string{"senang", "bagus", "baik", "suka", "mantap"}
-	negatif := [5]string{"buruk", "jelek", "benci", "tidak", "kurang"}
-
-	teks = strings.ToLower(teks)
-	for _, kata := range positif {
-		if strings.Contains(teks, kata) {
-			return "positif"
-		}
-	}
-	for _, kata := range negatif {
-		if strings.Contains(teks, kata) {
-			return "negatif"
-		}
-	}
-	return "netral"
-}
-
-// ===== CRUD Komentar =====
-func tambahKomentar(teks, moderator string) {
-	komentarList[jumlahKomentar] = Komentar{teks, analisisSentimen(teks), moderator}
-	jumlahKomentar++
-}
-
-func ubahKomentar(index int, teks string) {
-	if index >= 0 && index < jumlahKomentar {
-		komentarList[index].Teks = teks
-		komentarList[index].Sentimen = analisisSentimen(teks)
-	}
-}
-
-func hapusKomentar(index int) {
-	if index >= 0 && index < jumlahKomentar {
-		for i := index; i < jumlahKomentar-1; i++ {
-			komentarList[i] = komentarList[i+1]
-		}
-		jumlahKomentar--
-	}
-}
-
-// ===== Pencarian =====
-func sequentialSearch(keyword string) {
-	keyword = strings.ToLower(keyword)
-	for i := 0; i < jumlahKomentar; i++ {
-		if strings.Contains(strings.ToLower(komentarList[i].Teks), keyword) {
-			tampilkanKomentar(i)
-		}
-	}
-}
-
-func binarySearch(keyword string) {
-	insertionSortByTeks()
-	low := 0
-	high := jumlahKomentar - 1
-	for low <= high {
-		mid := (low + high) / 2
-		if strings.Contains(komentarList[mid].Teks, keyword) {
-			tampilkanKomentar(mid)
-			return
-		} else if komentarList[mid].Teks < keyword {
-			low = mid + 1
-		} else {
-			high = mid - 1
-		}
-	}
-	fmt.Println("Komentar tidak ditemukan.")
-}
-
-// ===== Pengurutan =====
-func selectionSortBySentimen() {
-	for i := 0; i < jumlahKomentar-1; i++ {
-		min := i
-		for j := i + 1; j < jumlahKomentar; j++ {
-			if komentarList[j].Sentimen < komentarList[min].Sentimen {
-				min = j
-			}
-		}
-		komentarList[i], komentarList[min] = komentarList[min], komentarList[i]
-	}
-}
-
-func insertionSortByTeks() {
-	for i := 1; i < jumlahKomentar; i++ {
-		temp := komentarList[i]
-		j := i - 1
-		for j >= 0 && komentarList[j].Teks > temp.Teks {
-			komentarList[j+1] = komentarList[j]
-			j--
-		}
-		komentarList[j+1] = temp
-	}
-}
-
-// ===== Statistik =====
-func tampilkanStatistik() {
-	pos, net, neg := 0, 0, 0
-	for i := 0; i < jumlahKomentar; i++ {
-		switch komentarList[i].Sentimen {
-		case "positif":
-			pos++
-		case "netral":
-			net++
-		case "negatif":
-			neg++
-		}
-	}
-	fmt.Println("Statistik Sentimen:")
-	fmt.Println("Positif:", pos)
-	fmt.Println("Netral :", net)
-	fmt.Println("Negatif:", neg)
-}
-
-// ===== Tampilan Komentar =====
-func tampilkanKomentar(index int) {
-	k := komentarList[index]
-	fmt.Printf("[%d] (%s) %s -> %s\n", index, k.Moderator, k.Teks, k.Sentimen)
-}
-
-func tampilkanSemuaKomentar() {
-	for i := 0; i < jumlahKomentar; i++ {
-		tampilkanKomentar(i)
-	}
-}
-
-// ===== Main Program =====
-func main() {
-	inisialisasiDataDummy()
-
-	var u, p string
-	fmt.Print("Username: ")
-	fmt.Scan(&u)
-	fmt.Print("Password: ")
-	fmt.Scan(&p)
-
-	if !login(u, p) {
-		fmt.Println(register(u, p))
-	}
-
 	for {
-		fmt.Println("\nMenu:")
-		fmt.Println("1. Tambah Komentar")
-		fmt.Println("2. Ubah Komentar")
-		fmt.Println("3. Hapus Komentar")
-		fmt.Println("4. Tampilkan Semua Komentar")
-		fmt.Println("5. Cari (Sequential)")
-		fmt.Println("6. Cari (Binary Search)")
-		fmt.Println("7. Urutkan (Sentimen)")
-		fmt.Println("8. Urutkan (Teks)")
-		fmt.Println("9. Statistik Sentimen")
-		fmt.Println("0. Keluar")
-		fmt.Print("Pilih: ")
+		tampilkanMenu()
+		fmt.Scanln(&pilihan)
 
-		var pilih int
-		fmt.Scan(&pilih)
-
-		switch pilih {
+		switch pilihan {
 		case 1:
-			fmt.Print("Komentar baru: ")
-			fmt.Scanln()
-			getline := ""
-			for getline == "" {
-				fmt.Scanln(&getline)
-			}
-			tambahKomentar(getline, u)
+			tambahKomentar(&daftarKomentar, &jumlahKomentar)
 		case 2:
-			fmt.Print("Index komentar yang diubah: ")
-			var i int
-			fmt.Scan(&i)
-			fmt.Print("Komentar baru: ")
-			fmt.Scanln()
-			getline := ""
-			for getline == "" {
-				fmt.Scanln(&getline)
-			}
-			ubahKomentar(i, getline)
+			ubahKomentar(&daftarKomentar, jumlahKomentar)
 		case 3:
-			fmt.Print("Index komentar yang dihapus: ")
-			var i int
-			fmt.Scan(&i)
-			hapusKomentar(i)
+			hapusKomentar(&daftarKomentar, &jumlahKomentar)
 		case 4:
-			tampilkanSemuaKomentar()
+			tampilkanKomentar(daftarKomentar, jumlahKomentar)
 		case 5:
-			fmt.Print("Kata kunci: ")
-			var k string
-			fmt.Scan(&k)
-			sequentialSearch(k)
+			tampilkanAnalisisKomentar(daftarKomentar, jumlahKomentar)
 		case 6:
-			fmt.Print("Kata kunci: ")
-			var k string
-			fmt.Scan(&k)
-			binarySearch(k)
+			cariKomentarBerdasarkanKategori(daftarKomentar, jumlahKomentar)
 		case 7:
-			selectionSortBySentimen()
-			fmt.Println("Diurutkan berdasarkan sentimen.")
+			urutkanKomentar(&daftarKomentar, jumlahKomentar)
 		case 8:
-			insertionSortByTeks()
-			fmt.Println("Diurutkan berdasarkan teks.")
+			tampilkanStatistik(daftarKomentar, jumlahKomentar)
+
 		case 9:
-			tampilkanStatistik()
-		case 0:
-			fmt.Println("Keluar...")
+			fmt.Println("╔═══════════════════════════════════════╗")
+			fmt.Println("║     TERIMA KASIH TELAH MENGGUNAKAN    ║")
+			fmt.Println("║  APLIKASI ANALISIS SENTIMEN KOMENTAR! ║")
+			fmt.Println("╠═══════════════════════════════════════╣")
+			fmt.Println("║         Semoga HARI-HARI Anda         ║")
+			fmt.Println("║              menyenangkan             ║")
+			fmt.Println("╚═══════════════════════════════════════╝")
 			return
+		default:
+			fmt.Println("❌ Pilihan tidak valid.")
 		}
 	}
+}
+
+func tampilkanMenu() {
+	fmt.Println("╔════════════════════════════════════════════════╗")
+	fmt.Println("║             MENU ANALISIS KOMENTAR             ║")
+	fmt.Println("╠════════════════════════════════════════════════╣")
+	fmt.Println("║ 1. Tambah Komentar                             ║")
+	fmt.Println("║ 2. Ubah Komentar                               ║")
+	fmt.Println("║ 3. Hapus Komentar                              ║")
+	fmt.Println("║ 4. Tampilkan Seluruh Komentar                  ║")
+	fmt.Println("║ 5. Tampilkan Anlisis Komentar                  ║")
+	fmt.Println("║ 6. Cari Komentar (Binary & Sequential Search)  ║")
+	fmt.Println("║ 7. Urutkan Komentar                            ║")
+	fmt.Println("║ 8. Tampilkan Statistik Komentar                ║")
+	fmt.Println("║ 9. Keluar                                      ║")
+	fmt.Println("╚════════════════════════════════════════════════╝")
+	fmt.Print("▶ Pilih menu: ")
+}
+
+func tambahKomentar(daftarKomentar *arrKalimat, idxKomentar *int) {
+	if *idxKomentar >= NMAX {
+		fmt.Println("❌ Maksimum komentar telah tercapai.")
+		return
+	}
+
+	var jumKata int
+	var idxKata int
+	fmt.Print("Berapa jumlah kata dalam komentar? ")
+	fmt.Scanln(&jumKata)
+
+	for idxKata < jumKata {
+		fmt.Printf("Kata ke-%d: ", idxKata+1)
+		fmt.Scan(&daftarKomentar[*idxKomentar].isi[idxKata])
+		daftarKomentar[*idxKomentar].jumlahKata++
+		idxKata++
+	}
+
+	*idxKomentar = *idxKomentar + 1
+	fmt.Println("✅ Komentar berhasil ditambahkan.")
+}
+
+func ubahKomentar(daftarKomentar *arrKalimat, jumlahKomentar int) {
+	var indeks int
+	var jumlahKata int
+
+	if jumlahKomentar == 0 {
+		fmt.Println("❗ Belum ada komentar yang dapat diubah.")
+		return
+	}
+
+	fmt.Println("Daftar Komentar:")
+	for i := 0; i < jumlahKomentar; i++ {
+		fmt.Printf("%d. ", i+1)
+		for j := 0; j < daftarKomentar[i].jumlahKata; j++ {
+			fmt.Print(daftarKomentar[i].isi[j], " ")
+		}
+		fmt.Println()
+	}
+
+	fmt.Print("Masukkan nomor komentar yang ingin diubah: ")
+	fmt.Scanln(&indeks)
+
+	indeks -= 1 // Konversi ke indeks array
+	if indeks < 0 || indeks >= jumlahKomentar {
+		fmt.Println("❌ Indeks komentar tidak valid.")
+		return
+	}
+
+	fmt.Print("Masukkan jumlah kata untuk komentar baru: ")
+	fmt.Scanln(&jumlahKata)
+
+	daftarKomentar[indeks].jumlahKata = 0
+	for i := 0; i < jumlahKata; i++ {
+		fmt.Printf("Kata ke-%d: ", i+1)
+		fmt.Scan(&daftarKomentar[indeks].isi[i])
+		daftarKomentar[indeks].jumlahKata++
+	}
+
+	fmt.Println("✅ Komentar berhasil diubah.")
+}
+
+func hapusKomentar(daftarKomentar *arrKalimat, jumlahKomentar *int) {
+	var indeks int
+
+	if *jumlahKomentar == 0 {
+		fmt.Println("❗ Belum ada komentar yang dapat dihapus.")
+		return
+	}
+
+	fmt.Println("Daftar Komentar:")
+	for i := 0; i < *jumlahKomentar; i++ {
+		fmt.Printf("%d. ", i+1)
+		for j := 0; j < daftarKomentar[i].jumlahKata; j++ {
+			fmt.Print(daftarKomentar[i].isi[j], " ")
+		}
+		fmt.Println()
+	}
+
+	fmt.Print("Masukkan nomor komentar yang ingin dihapus: ")
+	fmt.Scanln(&indeks)
+
+	indeks-- // Konversi ke indeks array
+	if indeks < 0 || indeks >= *jumlahKomentar {
+		fmt.Println("❌ Indeks komentar tidak valid.")
+		return
+	}
+
+	// Geser semua komentar setelah indeks ke kiri
+	for i := indeks; i < *jumlahKomentar-1; i++ {
+		daftarKomentar[i] = daftarKomentar[i+1]
+	}
+
+	*jumlahKomentar = *jumlahKomentar - 1
+	fmt.Println("✅ Komentar berhasil dihapus.")
+}
+
+func tampilkanKomentar(daftarKomentar arrKalimat, jumlahKomentar int) {
+	if jumlahKomentar == 0 {
+		fmt.Println("Belum ada komentar.")
+		return
+	}
+
+	fmt.Println("📋 Daftar Komentar:")
+	for i := 0; i < jumlahKomentar; i++ {
+		fmt.Printf("- Komentar %d: ", i+1)
+		for j := 0; j < daftarKomentar[i].jumlahKata; j++ {
+			fmt.Print(daftarKomentar[i].isi[j], " ")
+		}
+		fmt.Println()
+	}
+}
+
+func tampilkanAnalisisKomentar(daftarKomentar arrKalimat, jumlahKomentar int) {
+	var positif = [5]string{"baik", "bagus", "senang", "mantap", "puas"}
+	var negatif = [5]string{"buruk", "jelek", "kecewa", "parah", "tidak"}
+
+	if jumlahKomentar == 0 {
+		fmt.Println("❗ Belum ada komentar yang dapat dianalisis.")
+		return
+	}
+
+	fmt.Println("📊 Hasil Analisis Sentimen Komentar:")
+	for i := 0; i < jumlahKomentar; i++ {
+		var jumlahPositif int = 0
+		var jumlahNegatif int = 0
+
+		for j := 0; j < daftarKomentar[i].jumlahKata; j++ {
+			kata := daftarKomentar[i].isi[j]
+
+			// Cek kata positif satu per satu
+			for k := 0; k < 5; k++ {
+				if kata == positif[k] {
+					jumlahPositif = jumlahPositif + 1
+				}
+			}
+
+			// Cek kata negatif satu per satu
+			for k := 0; k < 5; k++ {
+				if kata == negatif[k] {
+					jumlahNegatif = jumlahNegatif + 1
+				}
+			}
+		}
+
+		var hasil string = "Netral"
+		if jumlahPositif > jumlahNegatif {
+			hasil = "Positif"
+		} else if jumlahNegatif > jumlahPositif {
+			hasil = "Negatif"
+		}
+
+		// Tampilkan hasil komentar dan analisisnya
+		fmt.Printf("%d. ", i+1)
+		for j := 0; j < daftarKomentar[i].jumlahKata; j++ {
+			fmt.Print(daftarKomentar[i].isi[j], " ")
+		}
+		fmt.Printf("➡️ [%s]\n", hasil)
+	}
+}
+
+func cariKomentarBerdasarkanKategori(daftarKomentar arrKalimat, jumlahKomentar int) {
+	var pilihan int
+	fmt.Println("╔════════════════════════════════════════════╗")
+	fmt.Println("║        PILIH JENIS PENCARIAN KOMENTAR      ║")
+	fmt.Println("╠════════════════════════════════════════════╣")
+	fmt.Println("║ 1. Cari komentar berdasarkan sentimen      ║")
+	fmt.Println("║ 2. Cari komentar berdasarkan kata pertama  ║")
+	fmt.Println("╚════════════════════════════════════════════╝")
+	fmt.Print("▶ Pilih jenis pencarian: ")
+	fmt.Scanln(&pilihan)
+
+	if pilihan == 1 {
+		var kategori string
+		fmt.Print("Masukkan kategori yang ingin dicari (positif/negatif/netral): ")
+		fmt.Scanln(&kategori)
+
+		var hasilDitemukan bool = false
+		fmt.Println("\n🔍 Hasil Pencarian (Sequential Search):")
+
+		for i := 0; i < jumlahKomentar; i++ {
+			var jumlahPositif, jumlahNegatif int
+
+			for j := 0; j < daftarKomentar[i].jumlahKata; j++ {
+				kata := daftarKomentar[i].isi[j]
+
+				if kata == "baik" || kata == "bagus" || kata == "senang" || kata == "mantap" || kata == "puas" {
+					jumlahPositif++
+				}
+				if kata == "buruk" || kata == "jelek" || kata == "kecewa" || kata == "parah" || kata == "tidak" {
+					jumlahNegatif++
+				}
+			}
+
+			var hasil string = "netral"
+			if jumlahPositif > jumlahNegatif {
+				hasil = "positif"
+			} else if jumlahNegatif > jumlahPositif {
+				hasil = "negatif"
+			}
+
+			if hasil == kategori {
+				hasilDitemukan = true
+				fmt.Printf("- Komentar ke-%d: ", i+1)
+				for j := 0; j < daftarKomentar[i].jumlahKata; j++ {
+					fmt.Print(daftarKomentar[i].isi[j], " ")
+				}
+				fmt.Println()
+			}
+		}
+
+		if !hasilDitemukan {
+			fmt.Println("Tidak ada komentar dengan kategori tersebut.")
+		}
+
+	} else if pilihan == 2 {
+		fmt.Print("Masukkan kata pertama komentar yang dicari: ")
+		var keyword string
+		fmt.Scanln(&keyword)
+
+		// Salin komentar ke array sementara
+		var temp arrKalimat
+		for i := 0; i < jumlahKomentar; i++ {
+			temp[i] = daftarKomentar[i]
+		}
+
+		// Urutkan komentar berdasarkan kata pertama (Insertion Sort)
+		for i := 1; i < jumlahKomentar; i++ {
+			tempData := temp[i]
+			j := i - 1
+			for j >= 0 && tempData.isi[0] < temp[j].isi[0] {
+				temp[j+1] = temp[j]
+				j--
+			}
+			temp[j+1] = tempData
+		}
+
+		// Binary Search
+		kiri := 0
+		kanan := jumlahKomentar - 1
+		ditemukan := false
+		for kiri <= kanan {
+			tengah := (kiri + kanan) / 2
+			if temp[tengah].isi[0] == keyword {
+				ditemukan = true
+				fmt.Print("Komentar ditemukan: ")
+				for j := 0; j < temp[tengah].jumlahKata; j++ {
+					fmt.Print(temp[tengah].isi[j], " ")
+				}
+				fmt.Println()
+				break
+			} else if keyword < temp[tengah].isi[0] {
+				kanan = tengah - 1
+			} else {
+				kiri = tengah + 1
+			}
+		}
+
+		if !ditemukan {
+			fmt.Println("Komentar dengan kata pertama tersebut tidak ditemukan.")
+		}
+
+	} else {
+		fmt.Println("❌ Pilihan tidak valid.")
+	}
+}
+
+func urutkanKomentar(data *arrKalimat, jumlah int) {
+	var pilihan int
+	fmt.Println("╔═════════════════════════════════════════════════════╗")
+	fmt.Println("║             PILIH JENIS PENGURUTAN KOMENTAR         ║")
+	fmt.Println("╠═════════════════════════════════════════════════════╣")
+	fmt.Println("║ 1. Berdasarkan jumlah kata (Selection Sort)         ║")
+	fmt.Println("║ 2. Berdasarkan sentimen Positif → Netral → Negatif  ║")
+	fmt.Println("╚═════════════════════════════════════════════════════╝")
+	fmt.Print("▶ Pilih jenis pengurutan: ")
+	fmt.Scanln(&pilihan)
+
+	if pilihan == 1 {
+		// Selection Sort berdasarkan jumlah kata
+		for i := 0; i < jumlah-1; i++ {
+			minIdx := i
+			for j := i + 1; j < jumlah; j++ {
+				if data[j].jumlahKata < data[minIdx].jumlahKata {
+					minIdx = j
+				}
+			}
+			if minIdx != i {
+				data[i], data[minIdx] = data[minIdx], data[i]
+			}
+		}
+
+		fmt.Println("✅ Komentar berhasil diurutkan berdasarkan jumlah kata.")
+	} else if pilihan == 2 {
+		// Insertion Sort berdasarkan sentimen (positif < netral < negatif)
+		for i := 1; i < jumlah; i++ {
+			temp := data[i]
+			j := i - 1
+
+			for j >= 0 && bandingkanSentimen(data[j]) > bandingkanSentimen(temp) {
+				data[j+1] = data[j]
+				j--
+			}
+			data[j+1] = temp
+		}
+
+		fmt.Println("✅ Komentar berhasil diurutkan berdasarkan sentimen.")
+
+	} else {
+		fmt.Println("❌ Pilihan tidak valid.")
+	}
+}
+
+// func pendukung untuk sorting
+func bandingkanSentimen(k komentar) int {
+	var jumlahPositif, jumlahNegatif int
+
+	for i := 0; i < k.jumlahKata; i++ {
+		if k.isi[i] == "baik" || k.isi[i] == "bagus" || k.isi[i] == "senang" || k.isi[i] == "mantap" || k.isi[i] == "puas" {
+			jumlahPositif++
+		} else if k.isi[i] == "buruk" || k.isi[i] == "jelek" || k.isi[i] == "kecewa" || k.isi[i] == "parah" || k.isi[i] == "tidak" {
+			jumlahNegatif++
+		}
+	}
+
+	if jumlahPositif > jumlahNegatif {
+		return 0 // Positif
+	} else if jumlahNegatif > jumlahPositif {
+		return 2 // Negatif
+	} else {
+		return 1 // Netral
+	}
+}
+
+func tampilkanStatistik(daftarKomentar arrKalimat, jumlahKomentar int) {
+	if jumlahKomentar == 0 {
+		fmt.Println("❗ Belum ada komentar untuk ditampilkan statistiknya.")
+		return
+	}
+
+	var jumlahPositif, jumlahNegatif, jumlahNetral int
+
+	for i := 0; i < jumlahKomentar; i++ {
+		positif := 0
+		negatif := 0
+
+		for j := 0; j < daftarKomentar[i].jumlahKata; j++ {
+			kata := daftarKomentar[i].isi[j]
+
+			// Cek apakah kata termasuk positif
+			if kata == "baik" || kata == "bagus" || kata == "senang" || kata == "mantap" || kata == "puas" {
+				positif++
+			}
+
+			// Cek apakah kata termasuk negatif
+			if kata == "buruk" || kata == "jelek" || kata == "kecewa" || kata == "parah" || kata == "tidak" {
+				negatif++
+			}
+		}
+
+		if positif > negatif {
+			jumlahPositif++
+		} else if negatif > positif {
+			jumlahNegatif++
+		} else {
+			jumlahNetral++
+		}
+	}
+
+	// Hitung persentase
+	total := jumlahPositif + jumlahNetral + jumlahNegatif
+	persenPositif := float64(jumlahPositif) / float64(total) * 100
+	persenNetral := float64(jumlahNetral) / float64(total) * 100
+	persenNegatif := float64(jumlahNegatif) / float64(total) * 100
+
+	// Tampilkan laporan statistik
+	fmt.Println("╔═══════════════════════════════════════╗")
+	fmt.Println("║       STATISTIK SENTIMEN KOMENTAR     ║")
+	fmt.Println("╠═══════════════════════════════════════╣")
+	fmt.Printf("║ Total Komentar : %-21d║\n", total)
+	fmt.Printf("║ Positif        : %-3d (%.1f%%)          ║\n", jumlahPositif, persenPositif)
+	fmt.Printf("║ Netral         : %-3d (%.1f%%)           ║\n", jumlahNetral, persenNetral)
+	fmt.Printf("║ Negatif        : %-3d (%.1f%%)          ║\n", jumlahNegatif, persenNegatif)
+	fmt.Println("╚═══════════════════════════════════════╝")
 }
