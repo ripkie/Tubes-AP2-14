@@ -90,30 +90,30 @@ func tampilkanMenu() {
 }
 
 func tambahKomentar(daftarKomentar *arrKalimat, idxKomentar *int) {
+	var jumKata int
 	if *idxKomentar >= NMAX {
 		fmt.Println("❌ Maksimum komentar telah tercapai.")
 		return
 	}
 
-	var jumKata int
-	var idxKata int
 	fmt.Print("Berapa jumlah kata dalam komentar? ")
 	fmt.Scanln(&jumKata)
 
-	for idxKata < jumKata {
-		fmt.Printf("Kata ke-%d: ", idxKata+1)
-		fmt.Scan(&daftarKomentar[*idxKomentar].isi[idxKata])
+	fmt.Println("Ketik komentar (kata-kata dipisah spasi):")
+
+	for i := 0; i < jumKata; i++ {
+		fmt.Scan(&daftarKomentar[*idxKomentar].isi[i])
 		daftarKomentar[*idxKomentar].jumlahKata++
-		idxKata++
 	}
 
 	*idxKomentar = *idxKomentar + 1
 	fmt.Println("✅ Komentar berhasil ditambahkan.")
+	return
 }
 
 func ubahKomentar(daftarKomentar *arrKalimat, jumlahKomentar int) {
 	var indeks int
-	var jumlahKata int
+	var jumKata int
 
 	if jumlahKomentar == 0 {
 		fmt.Println("❗ Belum ada komentar yang dapat diubah.")
@@ -132,18 +132,17 @@ func ubahKomentar(daftarKomentar *arrKalimat, jumlahKomentar int) {
 	fmt.Print("Masukkan nomor komentar yang ingin diubah: ")
 	fmt.Scanln(&indeks)
 
-	indeks -= 1 // Konversi ke indeks array
+	indeks-- // Konversi ke indeks array
 	if indeks < 0 || indeks >= jumlahKomentar {
 		fmt.Println("❌ Indeks komentar tidak valid.")
 		return
 	}
 
-	fmt.Print("Masukkan jumlah kata untuk komentar baru: ")
-	fmt.Scanln(&jumlahKata)
+	fmt.Print("Berapa jumlah kata dalam komentar baru? ")
+	fmt.Scanln(&jumKata)
 
 	daftarKomentar[indeks].jumlahKata = 0
-	for i := 0; i < jumlahKata; i++ {
-		fmt.Printf("Kata ke-%d: ", i+1)
+	for i := 0; i < jumKata; i++ {
 		fmt.Scan(&daftarKomentar[indeks].isi[i])
 		daftarKomentar[indeks].jumlahKata++
 	}
@@ -246,7 +245,7 @@ func tampilkanAnalisisKomentar(daftarKomentar arrKalimat, jumlahKomentar int) {
 		for j := 0; j < daftarKomentar[i].jumlahKata; j++ {
 			fmt.Print(daftarKomentar[i].isi[j], " ")
 		}
-		fmt.Printf("➡️ [%s]\n", hasil)
+		fmt.Printf("➡️  [%s]\n", hasil)
 	}
 }
 
@@ -256,7 +255,7 @@ func cariKomentarBerdasarkanKategori(daftarKomentar arrKalimat, jumlahKomentar i
 	fmt.Println("║        PILIH JENIS PENCARIAN KOMENTAR      ║")
 	fmt.Println("╠════════════════════════════════════════════╣")
 	fmt.Println("║ 1. Cari komentar berdasarkan sentimen      ║")
-	fmt.Println("║ 2. Cari komentar berdasarkan kata pertama  ║")
+	fmt.Println("║ 2. Cari komentar berdasarkan kata          ║")
 	fmt.Println("╚════════════════════════════════════════════╝")
 	fmt.Print("▶ Pilih jenis pencarian: ")
 	fmt.Scanln(&pilihan)
@@ -304,51 +303,33 @@ func cariKomentarBerdasarkanKategori(daftarKomentar arrKalimat, jumlahKomentar i
 			fmt.Println("Tidak ada komentar dengan kategori tersebut.")
 		}
 
+		// binary search
 	} else if pilihan == 2 {
-		fmt.Print("Masukkan kata pertama komentar yang dicari: ")
+		fmt.Print("Masukkan kata yang ingin dicari di komentar: ")
 		var keyword string
 		fmt.Scanln(&keyword)
 
-		// Salin komentar ke array sementara
-		var temp arrKalimat
+		var ditemukan bool = false
+		fmt.Println("\n🔍 Hasil Pencarian (Sequential Search):")
 		for i := 0; i < jumlahKomentar; i++ {
-			temp[i] = daftarKomentar[i]
-		}
-
-		// Urutkan komentar berdasarkan kata pertama (Insertion Sort)
-		for i := 1; i < jumlahKomentar; i++ {
-			tempData := temp[i]
-			j := i - 1
-			for j >= 0 && tempData.isi[0] < temp[j].isi[0] {
-				temp[j+1] = temp[j]
-				j--
-			}
-			temp[j+1] = tempData
-		}
-
-		// Binary Search
-		kiri := 0
-		kanan := jumlahKomentar - 1
-		ditemukan := false
-		for kiri <= kanan {
-			tengah := (kiri + kanan) / 2
-			if temp[tengah].isi[0] == keyword {
-				ditemukan = true
-				fmt.Print("Komentar ditemukan: ")
-				for j := 0; j < temp[tengah].jumlahKata; j++ {
-					fmt.Print(temp[tengah].isi[j], " ")
+			var komentarDicetak bool = false
+			for j := 0; j < daftarKomentar[i].jumlahKata; j++ {
+				if daftarKomentar[i].isi[j] == keyword {
+					ditemukan = true
+					if !komentarDicetak {
+						fmt.Printf("- Komentar ke-%d: ", i+1)
+						for k := 0; k < daftarKomentar[i].jumlahKata; k++ {
+							fmt.Print(daftarKomentar[i].isi[k], " ")
+						}
+						fmt.Println()
+						komentarDicetak = true
+					}
 				}
-				fmt.Println()
-				break
-			} else if keyword < temp[tengah].isi[0] {
-				kanan = tengah - 1
-			} else {
-				kiri = tengah + 1
 			}
 		}
 
 		if !ditemukan {
-			fmt.Println("Komentar dengan kata pertama tersebut tidak ditemukan.")
+			fmt.Println("Komentar dengan kata tersebut tidak ditemukan.")
 		}
 
 	} else {
