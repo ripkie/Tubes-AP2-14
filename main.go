@@ -86,7 +86,7 @@ func tampilkanMenu() {
 	fmt.Println("║ 8. Tampilkan Statistik Komentar                ║")
 	fmt.Println("║ 9. Keluar                                      ║")
 	fmt.Println("╚════════════════════════════════════════════════╝")
-	fmt.Print("▶ Pilih menu: ")
+	fmt.Println("▶ Pilih menu: ")
 }
 
 func tambahKomentar(daftarKomentar *arrKalimat, idxKomentar *int) {
@@ -101,6 +101,8 @@ func tambahKomentar(daftarKomentar *arrKalimat, idxKomentar *int) {
 
 	fmt.Println("Ketik komentar (kata-kata dipisah spasi):")
 
+	daftarKomentar[*idxKomentar].jumlahKata = 0 // reset jumlah kata sebelum input
+
 	for i := 0; i < jumKata; i++ {
 		fmt.Scan(&daftarKomentar[*idxKomentar].isi[i])
 		daftarKomentar[*idxKomentar].jumlahKata++
@@ -108,7 +110,13 @@ func tambahKomentar(daftarKomentar *arrKalimat, idxKomentar *int) {
 
 	*idxKomentar = *idxKomentar + 1
 	fmt.Println("✅ Komentar berhasil ditambahkan.")
-	return
+
+	// Stop / pause sebelum lanjut
+	fmt.Print("Tekan ENTER untuk kembali ke menu...")
+	fmt.Scanln() // baca newline yang tertinggal
+	fmt.Scanln() // tunggu user tekan enter
+
+	tampilkanMenu() // panggil menu selanjutnya
 }
 
 func ubahKomentar(daftarKomentar *arrKalimat, jumlahKomentar int) {
@@ -148,6 +156,13 @@ func ubahKomentar(daftarKomentar *arrKalimat, jumlahKomentar int) {
 	}
 
 	fmt.Println("✅ Komentar berhasil diubah.")
+
+	// Pause sebelum lanjut, misalnya kembali ke menu
+	fmt.Print("Tekan ENTER untuk kembali ke menu...")
+	fmt.Scanln() // menangkap newline leftover
+	fmt.Scanln() // menunggu enter dari user
+
+	tampilkanMenu() // panggil menu utama jika ada
 }
 
 func hapusKomentar(daftarKomentar *arrKalimat, jumlahKomentar *int) {
@@ -260,6 +275,7 @@ func cariKomentarBerdasarkanKategori(daftarKomentar arrKalimat, jumlahKomentar i
 	fmt.Print("▶ Pilih jenis pencarian: ")
 	fmt.Scanln(&pilihan)
 
+	// sequential search
 	if pilihan == 1 {
 		var kategori string
 		fmt.Print("Masukkan kategori yang ingin dicari (positif/negatif/netral): ")
@@ -363,6 +379,14 @@ func urutkanKomentar(data *arrKalimat, jumlah int) {
 		}
 
 		fmt.Println("✅ Komentar berhasil diurutkan berdasarkan jumlah kata.")
+		fmt.Println("📋 Daftar Komentar:")
+		for i := 0; i < jumlah; i++ {
+			fmt.Printf("- Komentar %d: ", i+1)
+			for j := 0; j < data[i].jumlahKata; j++ {
+				fmt.Print(data[i].isi[j], " ")
+			}
+			fmt.Println()
+		}
 	} else if pilihan == 2 {
 		// Insertion Sort berdasarkan sentimen (positif < netral < negatif)
 		for i := 1; i < jumlah; i++ {
@@ -377,6 +401,14 @@ func urutkanKomentar(data *arrKalimat, jumlah int) {
 		}
 
 		fmt.Println("✅ Komentar berhasil diurutkan berdasarkan sentimen.")
+		fmt.Println("📋 Daftar Komentar:")
+		for i := 0; i < jumlah; i++ {
+			fmt.Printf("- Komentar %d: ", i+1)
+			for j := 0; j < data[i].jumlahKata; j++ {
+				fmt.Print(data[i].isi[j], " ")
+			}
+			fmt.Println()
+		}
 
 	} else {
 		fmt.Println("❌ Pilihan tidak valid.")
