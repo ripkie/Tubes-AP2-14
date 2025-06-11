@@ -96,7 +96,7 @@ func tambahKomentar(daftarKomentar *arrKalimat, idxKomentar *int) {
 		return
 	}
 
-	fmt.Print("Berapa jumlah kata dalam komentar? ")
+	fmt.Print("masukan jumlah kata dalam komentar: ")
 	fmt.Scanln(&jumKata)
 
 	fmt.Println("Ketik komentar (kata-kata dipisah spasi):")
