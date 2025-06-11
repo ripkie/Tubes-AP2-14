@@ -101,7 +101,7 @@ func tambahKomentar(daftarKomentar *arrKalimat, idxKomentar *int) {
 
 	fmt.Println("Ketik komentar (kata-kata dipisah spasi):")
 
-	daftarKomentar[*idxKomentar].jumlahKata = 0 // reset jumlah kata sebelum input
+	daftarKomentar[*idxKomentar].jumlahKata = 0 // reset jumlah kata sebelum input.
 
 	for i := 0; i < jumKata; i++ {
 		fmt.Scan(&daftarKomentar[*idxKomentar].isi[i])
